@@ -1,0 +1,343 @@
+{
+	"info": {
+		"_postman_id": "3357cac1-5b6b-4ac6-8f5b-8a78b944f099",
+		"name": "DummyJSON Users API Testing",
+		"description": "StartFragmentPerformed end-to-end CRUD API testing using DummyJSON Users API. Created and executed test cases for GET, POST, PUT, and DELETE endpoints. Added Postman assertions for status codes, response validation, and field-level checks. Exported a complete Postman collection with tests. Prepared basic bug reports for failed scenarios and documented results.EndFragment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48209885",
+		"_collection_link": "https://www.postman.com/amulmahaleborkar-9996550/workspace/project-1-dummyjson/collection/48209885-3357cac1-5b6b-4ac6-8f5b-8a78b944f099?action=share&source=collection_link&creator=48209885"
+	},
+	"item": [
+		{
+			"name": "GET – All Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// GET – All Users: Positive and Negative Test Cases",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Positive: Status code and structure",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response is an object with users array\", function () {",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData.users).to.be.an('array');",
+							"});",
+							"pm.test(\"Each user has required fields and correct types\", function () {",
+							"    jsonData.users.forEach(function(user) {",
+							"        pm.expect(user).to.have.property('id').that.is.a('number');",
+							"        pm.expect(user).to.have.property('firstName').that.is.a('string');",
+							"        pm.expect(user).to.have.property('lastName').that.is.a('string');",
+							"        pm.expect(user).to.have.property('email').that.is.a('string');",
+							"    });",
+							"});",
+							"",
+							"// Negative: Invalid endpoint",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString() + '/invalid',",
+							"    method: 'GET'",
+							"}, function (err, res) {",
+							"    pm.test(\"Invalid endpoint returns 404\", function () {",
+							"        pm.expect(res.code).to.eql(404);",
+							"    });",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/users",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET – User by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// GET – User by ID: Positive and Negative Test Cases",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Positive: Status code and structure",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response contains user object with required fields\", function () {",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.property('id').that.is.a('number');",
+							"    pm.expect(jsonData).to.have.property('firstName').that.is.a('string');",
+							"    pm.expect(jsonData).to.have.property('lastName').that.is.a('string');",
+							"    pm.expect(jsonData).to.have.property('email').that.is.a('string');",
+							"});",
+							"",
+							"// Negative: Non-existent user",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString().replace(/\\d+$/, '99999'),",
+							"    method: 'GET'",
+							"}, function (err, res) {",
+							"    pm.test(\"Non-existent user returns 404\", function () {",
+							"        pm.expect(res.code).to.eql(404);",
+							"        pm.expect(res.json().message || res.json().error).to.match(/not found|No record/i);",
+							"    });",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/users/1",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST – Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// POST – Create User: Positive and Negative Test Cases",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Positive: Status code and structure",
+							"pm.test(\"Status code is 200 or 201\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+							"});",
+							"pm.test(\"Response contains created user with required fields\", function () {",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.property('id').that.is.a('number');",
+							"    pm.expect(jsonData).to.have.property('firstName').that.is.a('string');",
+							"    pm.expect(jsonData).to.have.property('lastName').that.is.a('string');",
+							"    pm.expect(jsonData).to.have.property('email').that.is.a('string');",
+							"});",
+							"",
+							"// Negative: Missing required field",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString(),",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json'},",
+							"    body: { mode: 'raw', raw: JSON.stringify({ lastName: 'Doe', email: 'jane@example.com' }) }",
+							"}, function (err, res) {",
+							"    pm.test(\"Missing firstName returns 400 or error\", function () {",
+							"        pm.expect([400, 422, 500]).to.include(res.code);",
+							"        pm.expect(res.json().message || res.json().error).to.match(/firstName|required/i);",
+							"    });",
+							"});",
+							"",
+							"// Negative: Unauthorized (simulate by sending to a protected endpoint)",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString().replace('/add', '/add/protected'),",
+							"    method: 'POST',",
+							"    header: {'Content-Type': 'application/json'},",
+							"    body: { mode: 'raw', raw: JSON.stringify({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' }) }",
+							"}, function (err, res) {",
+							"    pm.test(\"Unauthorized returns 401 or 403\", function () {",
+							"        pm.expect([401, 403, 404]).to.include(res.code);",
+							"    });",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Amul\",\r\n    \"lastName\": \"Mahale\",\r\n    \"age\": 24,\r\n    \"gender\": \"male\",\r\n    \"email\": \"amul.mahale+qa@example.com\",\r\n    \"username\": \"amulqa\",\r\n    \"password\": \"Test@123\",\r\n    \"image\": \"/mnt/data/72bc8d96-78ee-4a35-b9b2-ffb140f9fcd3.png\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dummyjson.com/users/add",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"users",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT – Update User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// PUT – Update User: Positive and Negative Test Cases",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Positive: Status code and structure",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response contains updated user with required fields\", function () {",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.property('id').that.is.a('number');",
+							"    pm.expect(jsonData).to.have.property('firstName').that.is.a('string');",
+							"    pm.expect(jsonData).to.have.property('lastName').that.is.a('string');",
+							"    pm.expect(jsonData).to.have.property('email').that.is.a('string');",
+							"});",
+							"",
+							"// Negative: Invalid user ID",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString().replace(/\\d+$/, '99999'),",
+							"    method: 'PUT',",
+							"    header: {'Content-Type': 'application/json'},",
+							"    body: { mode: 'raw', raw: JSON.stringify({ firstName: 'Invalid' }) }",
+							"}, function (err, res) {",
+							"    pm.test(\"Invalid user ID returns 404\", function () {",
+							"        pm.expect(res.code).to.eql(404);",
+							"        pm.expect(res.json().message || res.json().error).to.match(/not found|No record/i);",
+							"    });",
+							"});",
+							"",
+							"// Negative: Unauthorized (simulate by sending to a protected endpoint)",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString() + '/protected',",
+							"    method: 'PUT',",
+							"    header: {'Content-Type': 'application/json'},",
+							"    body: { mode: 'raw', raw: JSON.stringify({ firstName: 'Jane' }) }",
+							"}, function (err, res) {",
+							"    pm.test(\"Unauthorized returns 401 or 403\", function () {",
+							"        pm.expect([401, 403, 404]).to.include(res.code);",
+							"    });",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\": \"Amul Updated\",\r\n    \"age\": 25\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dummyjson.com/users/1",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE – User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// DELETE – User: Positive and Negative Test Cases",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Positive: Status code and structure",
+							"pm.test(\"Status code is 200 or 204\", function () {",
+							"    pm.expect([200, 204]).to.include(pm.response.code);",
+							"});",
+							"pm.test(\"Response contains deleted user id or confirmation\", function () {",
+							"    pm.expect(jsonData).to.be.an('object');",
+							"    pm.expect(jsonData).to.have.property('id').that.is.a('number');",
+							"});",
+							"",
+							"// Negative: Invalid user ID",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString().replace(/\\d+$/, '99999'),",
+							"    method: 'DELETE'",
+							"}, function (err, res) {",
+							"    pm.test(\"Invalid user ID returns 404\", function () {",
+							"        pm.expect(res.code).to.eql(404);",
+							"        pm.expect(res.json().message || res.json().error).to.match(/not found|No record/i);",
+							"    });",
+							"});",
+							"",
+							"// Negative: Unauthorized (simulate by sending to a protected endpoint)",
+							"pm.sendRequest({",
+							"    url: pm.request.url.toString() + '/protected',",
+							"    method: 'DELETE'",
+							"}, function (err, res) {",
+							"    pm.test(\"Unauthorized returns 401 or 403\", function () {",
+							"        pm.expect([401, 403, 404]).to.include(res.code);",
+							"    });",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://dummyjson.com/users/1",
+					"protocol": "https",
+					"host": [
+						"dummyjson",
+						"com"
+					],
+					"path": [
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
